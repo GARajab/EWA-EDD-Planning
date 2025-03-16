@@ -16,7 +16,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['planningrajab.up.railway.app','localhost','127.0.0.1']
 
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://planningrajab.up.railway.app',
+]
 
 
 # Application definition
