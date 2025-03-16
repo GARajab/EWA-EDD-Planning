@@ -71,10 +71,10 @@ WSGI_APPLICATION = "planningApp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "planningewadb",  # Database name from Aiven
-        "USER": "planningewadb_user",  # Username from Aiven
-        "PASSWORD": "jsTnfhRnAYhb4GISGj7HWqaZzeptdOuM",  # Password from Aiven
-        "HOST": "dpg-cv8t6gtumphs738ut380-a.oregon-postgres.render.com",  # Hostname from Aiven
+        "NAME": "railway",  # Database name from Aiven
+        "USER": "postgres",  # Username from Aiven
+        "PASSWORD": "LOHdxEKMSiEacQmEebckzxmEgQbtsOao",  # Password from Aiven
+        "HOST": "postgres.railway.internal",  # Hostname from Aiven
         "PORT": "5432",  # Port from Aiven (default is 5432)
         "OPTIONS": {
             "sslmode": "require",  # Enable SSL
