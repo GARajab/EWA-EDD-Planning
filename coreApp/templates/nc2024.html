@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script>
+  function submitForm(recordId) {
+    document.getElementById("recordId_" + recordId).value = recordId;
+    document.getElementById("myForm_" + recordId).submit();
+  }
+</script>
+<style>
+  #dt-search-0 {
+    width: 300px;
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    /* Adjust as needed */
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    /* Enable scrolling for the body */
+    flex-grow: 1;
+    /* Allow the body to grow and fill available space */
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    /* Match the modal background */
+    z-index: 1;
+    /* Ensure the footer stays above the body content */
+    padding: 15px;
+    /* Add padding for better spacing */
+  }
+
+  .form-group {
+    height: 100px;
+  }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<div class="container mt-4" style="max-width: 1500px;">
+  <div class="bar" style="display:flex ;">
+    <h1 class="text-center" style="flex-grow: 1;">NC Table</h1>
+  </div>
+  {% if permits %}
+  <table id="nc24" class="table" width="100%" style="text-align: center;">
+    <thead class="table-info sticky-top">
+      <tr>
+        <th>NC Number</th>
+        <th>Refrence Number</th>
+        <th>KW</th>
+        <th>KVA</th>
+        <th>Plan Engineer</th>
+        <th>Plan Status</th>
+        <th>Block</th>
+        <th>Passed Date</th>
+        <th>GIS Date</th>
+        <th>WayLeave Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for permit in permits %}
+      <tr>
+        <td>{{ permit.Number }}</td>
+        <td>{{ permit.ref_no }}</td>
+        <td>{{ permit.kw }}</td>
+        <td>{{ permit.kva }}</td>
+        <td>{{ permit.planeng }}</td>
+        <td>
+          <span style="font-size: 12px;"
+            class="{% if permit.plan_status == 'COMPLETED' %}badge badge-success rounded-pill d-inline{% elif permit.plan_status == 'IN GIS' %}badge badge-primary rounded-pill d-inline{% elif permit.plan_status == 'IN WAYLEAVE' %}badge badge-warning rounded-pill d-inline{% elif permit.plan_status == 'NOT REQUIRED' %}badge badge-info rounded-pill d-inline{% elif permit.plan_status == 'IN DESIGN' %}badge badge-danger rounded-pill d-inline{% endif %}">
+            {{ permit.plan_status }}
+          </span>
+        <td>{{ permit.block }}</td>
+        <td>{{ permit.passed_date }}</td>
+        <td>{{ permit.to_gis_date }}</td>
+        <td>{{ permit.to_wl_date }}</td>
+        <td style="width: 230px;">
+          <!-- View Icon -->
+          <a href="{% url 'view_case_nc' permit.id %}" style="text-decoration: none;">
+            <i class="fas fa-eye" style="font-size: 20px; color: #4CAF50; padding: 10px; display: inline-block;"></i>
+          </a>
+          <!-- edit -->
+          <i class="fas fa-edit" data-bs-toggle="modal" data-bs-target="#updateModal" data-id="{{ permit.id }}"
+            style="text-decoration: none;font-size: 20px; color: #f4c767; padding: 10px; display: inline-block;"></i>
+          <!-- delete -->
+          {% if is_admin %}
+          <i class="fas fa-trash text-danger" style="cursor: pointer; font-size: 20px; padding: 10px;"
+            data-bs-toggle="modal" data-bs-target="#deleteModal_{{ permit.id }}"></i>
+          <!-- Delete Confirmation Modal -->
+          <div class="modal fade" id="deleteModal_{{ permit.id }}" tabindex="-1" aria-labelledby="deleteModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to delete scheme number {{permit.Number}}?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <form action="{% url 'delete_Nc' permit.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <h1>No Data Available</h1>
+  {% endif %}
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateModalLabel">Update Permit</h5>
+      </div>
+      <div class="modal-body">
+        <form id="updateNc24" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="id" id="permitId">
+
+          <!-- Form Fields -->
+          <div class="form-group">
+            <label for="Number">Permit Number</label>
+            <input type="text" class="form-control" id="Number" name="Number" required>
+          </div>
+
+          <div class="form-group">
+            <label for="parcel_number">Parcel Number</label>
+            <input type="text" class="form-control" id="parcel_number" name="parcel_number">
+          </div>
+
+          <div class="form-group">
+            <label for="block">Block</label>
+            <input type="text" class="form-control" id="block" name="block">
+          </div>
+
+          <div class="form-group">
+            <label for="kw">KW</label>
+            <input type="number" class="form-control" id="kw" name="kw" step="0.01">
+          </div>
+
+          <div class="form-group">
+            <label for="kva">KVA</label>
+            <input type="number" class="form-control" id="kva" name="kva" step="0.01">
+          </div>
+
+          <div class="form-group">
+            <label for="planeng">Plan Engineer</label>
+            <input type="text" class="form-control" id="planeng" name="planeng">
+          </div>
+
+          <div class="form-group">
+            <label for="plan_status">Plan Status</label>
+            <select class="form-select" id="plan_status" name="plan_status">
+              <option value="In Design">In Design</option>
+              <option value="In GIS">In GIS</option>
+              <option value="In Wayleave">In Wayleave</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="passed_date">Passed Date</label>
+            <input type="date" class="form-control flatpickr" id="passed_date" name="passed_date">
+          </div>
+
+          <div class="form-group">
+            <label for="to_wl_date">To WL Date</label>
+            <input type="date" class="form-control flatpickr" id="to_wl_date" name="to_wl_date">
+          </div>
+
+          <div class="form-group">
+            <label for="to_gis_date">To GIS Date</label>
+            <input type="date" class="form-control flatpickr" id="to_gis_date" name="to_gis_date">
+          </div>
+
+          <div class="form-group">
+            <label for="wl_number">WL Number</label>
+            <input type="text" class="form-control" id="wl_number" name="wl_number">
+          </div>
+
+          <div class="form-group">
+            <label for="ref_no">Reference Number</label>
+            <input type="text" class="form-control" id="ref_no" name="ref_no">
+          </div>
+
+          <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea class="form-control" id="comment" name="comment"></textarea>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="submitButton" type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js"
+  integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.es.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script>
+  $(document).ready(function () {
+    // Attach the show event for the modal
+    $('#updateModal').off('show.bs.modal').on('show.bs.modal', function (event) {
+      console.log("Modal show event triggered"); // Debugging
+      var button = $(event.relatedTarget); // Button that triggered the modal
+      var permitId = button.data('id'); // Extract permit ID from data-id attribute
+      if (!permitId) {
+        console.error("Invalid or missing permit ID.");
+        return;
+      }
+
+      // Fetch permit data using AJAX
+      $.get('/updateNc/' + permitId + '/', function (data) {
+        // Populate form fields with fetched data
+        $('#permitId').val(data.id);
+        $('#parcel_number').val(data.parcel_number);
+        $('#Number').val(data.Number);
+        $('#block').val(data.block);
+        $('#kw').val(data.kw);
+        $('#kva').val(data.kva);
+        $('#planeng').val(data.planeng);
+        $('#plan_status').val(data.plan_status);
+        $('#passed_date').val(data.passed_date);
+        $('#to_wl_date').val(data.to_wl_date);
+        $('#to_gis_date').val(data.to_gis_date);
+        $('#wl_number').val(data.wl_number);
+        $('#ref_no').val(data.ref_no);
+        $('#comment').val(data.comment);
+      }).fail(function (error) {
+        console.error("Error fetching permit data:", error); // Log AJAX errors
+      });
+    });
+
+    // Form submission handler
+    $("#updateNc24").on("submit", function (event) {
+      event.preventDefault(); // Prevent default form submission
+
+      let $submitButton = $('#submitButton');
+      let originalText = $submitButton.html(); // Save the original button text
+
+      // Change button text to spinner and "Saving Data"
+      $submitButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving Data');
+      $submitButton.prop('disabled', true); // Disable the button to prevent multiple submissions
+
+      var permitId = $('#permitId').val(); // Get permitId from the hidden input field
+      console.log("Permit ID on submit:", permitId); // Debugging: Log the permitId
+
+      if (!permitId) {
+        console.error("Invalid or missing permit ID.");
+        return;
+      }
+
+      // Function to retrieve CSRF token from cookies
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      const csrftoken = getCookie('csrftoken');
+
+      // Submit form data via AJAX
+      $.ajax({
+        type: "POST",
+        url: '/updateNc/' + permitId + '/', // Use permitId in the URL
+        data: $(this).serialize(),
+        headers: {
+          "X-CSRFToken": csrftoken
+        },
+        success: function (response) {
+          console.log("Response from server:", response); // Log the server response
+
+          // Check if the response contains a 'success' field
+          if (response.success === true) {
+            // On success, change button text to "Saved" with a tick
+            $submitButton.html('<span class="fas fa-check"></span> Saved');
+            setTimeout(function () {
+              location.reload(); // Reload the page after a short delay
+            }, 1000); // Adjust the delay as needed
+          } else {
+            // Handle cases where the response does not contain a 'success' field
+            console.error("Server response does not contain a 'success' field:", response);
+            $submitButton.html('Error! Try Again');
+            $submitButton.prop('disabled', false); // Re-enable the button
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("AJAX Error:", status, error); // Log the full error
+          console.error("Server Response:", xhr.responseText); // Log the server's response
+          $submitButton.html('Error! Try Again');
+          $submitButton.prop('disabled', false); // Re-enable the button
+        }
+      });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    var table = $('#nc24').DataTable({
+      dom: '<"top"<"left"lB><"right"f>>rt<"bottom"ip><"clear">',
+      buttons: [
+        'copy', 'csv', 'excel', 'pdf', 'print'
+      ],
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    flatpickr(".flatpickr", {
+      dateFormat: "Y-m-d", // Set the format to yyyy-MM-dd
+    });
+  });
+</script>
+{% endblock %}

@@ -1,1 +1,2 @@
-# EWA-EDD-Planning
+# planningProject
+# planningEWA

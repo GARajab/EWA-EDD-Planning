@@ -1,0 +1,274 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<title>MainRecordsWeb Rajab</title>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- DataTables CSS -->
+  <link
+    href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.2/b-3.2.2/b-html5-3.2.2/r-3.0.4/sb-1.8.2/sl-3.0.0/datatables.min.css"
+    rel="stylesheet">
+  <!-- MDB -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.min.css" rel="stylesheet" />
+  <style>
+    /* Ensure the navbar items are displayed in a single line */
+    .navbar-nav {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    /* Remove extra margins and padding */
+    .nav-item {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Ensure dropdown items are inline */
+    .dropdown {
+      display: inline-block;
+    }
+
+    /* Adjust the margin for dropdown links */
+    .nav-link {
+      margin-right: 30px;
+    }
+
+    .linkFontSize {
+      font-size: large;
+    }
+
+    /* Preload layer styles */
+    #preload-layer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.9);
+      z-index: 10000;
+      /* High z-index to ensure it's on top */
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Spinner styles */
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3B71CA;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Toast container -->
+  <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="width: 370px;">
+      <!-- Success Toast -->
+      <div id="successToast" class="toast toast-modern" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <i class="fas fa-check-circle me-2"></i>
+          <strong class="me-auto">Success</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <!-- Message content will be inserted here -->
+          Your operation was successful!
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Navbar at the top -->
+  <nav class="navbar navbar-expand-md navbar-light bg-body-tertiary">
+    <div>
+      <a href="http://"><img src="{% static 'images/logo.png' %}" alt="" style="width: 20%;"></a>
+      <a href="http://"><img src="{% static 'images/EWALogo.png' %}" alt="" style="width: 20%;"></a>
+    </div>
+    <div class="container-fluid">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <div class="dropdown">
+            <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center hidden-arrow links"
+              href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+              <span
+                class="badge badge-danger rounded-pill d-inline linkFontSize shadow p-3 mb-0 bg-body-tertiary rounded">Depot
+                Schemes Reports</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+              <li><a class="dropdown-item" href="{% url 'depot24Report' %}">2024</a></li>
+              <li><a class="dropdown-item" href="{% url 'depot25Report' %}">2025</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="dropdown">
+            <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center hidden-arrow links"
+              href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+              <span
+                class="badge badge-success rounded-pill d-inline linkFontSize shadow p-3 mb-0 bg-body-tertiary rounded">Depot
+                Schemes</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+              <li><a class="dropdown-item" href="{% url 'depot24' %}">2024</a></li>
+              <li><a class="dropdown-item" href="{% url 'depot25' %}">2025</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="dropdown">
+            <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center hidden-arrow links"
+              href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+              <span
+                class="badge badge-info rounded-pill d-inline linkFontSize shadow p-3 mb-0 bg-body-tertiary rounded">LoadReading
+                Schemes</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+              <li><a class="dropdown-item" href="{% url 'lr24' %}">2024</a></li>
+              <li><a class="dropdown-item" href="{% url 'lr25' %}">2025</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="dropdown">
+            <a data-mdb-dropdown-init class="nav-link dropdown-toggle d-flex align-items-center hidden-arrow links"
+              href="#" id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+              <span
+                class="badge badge-warning rounded-pill d-inline linkFontSize linksBtns shadow p-3 mb-0 bg-body-tertiary rounded">Design
+                In BP Stage</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+              <li><a class="dropdown-item" href="{% url 'nc24' %}">NC Page</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center hidden-arrow links" href="{% url 'dashboard' %}"
+            id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+            <span
+              class="badge badge-warning rounded-pill d-inline linkFontSize linksBtns shadow p-3 mb-0 bg-body-tertiary rounded">Charts</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- User dropdown aligned to the right -->
+      <div class="d-flex align-items-center ms-auto">
+        <div class="dropdown">
+          <a data-mdb-dropdown-init class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#"
+            id="navbarDropdownMenuAvatar" role="button" aria-expanded="false">
+            <img src="{% static 'images/user.jpeg' %}" class="rounded-circle" height="25"
+              alt="Black and White Portrait of a Man" loading="lazy" />
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+            <li><a class="dropdown-item" href="#">{{ user.username }}</a></li>
+            {% if user.is_authenticated %}
+            {% else %}
+            <li><a class="dropdown-item" href="#">Login</a></li>
+            {% endif %}
+            <li><a class="dropdown-item" href="{% url 'signout' %}">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% if messages %}
+  {% for message in messages %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const toastEl = document.getElementById('successToast');
+      const toastBody = toastEl.querySelector('.toast-body');
+      toastBody.textContent = '{{ message }}';  // Insert the message content
+      const toast = new bootstrap.Toast(toastEl);  // Initialize the toast
+      toast.show();  // Show the toast
+    });
+  </script>
+  {% endfor %}
+  {% endif %}
+  <!-- Centered content below the navbar -->
+  <div class="center-content">
+    {% block content %}
+    <!-- Content will be injected here -->
+    {% endblock %}
+  </div>
+
+  <!-- Preload layer with spinner -->
+  <div id="preload-layer">
+    <div class="spinner"></div>
+  </div>
+
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <!-- MDB UI Kit -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/8.1.0/mdb.umd.min.js"></script>
+  <!-- pdfmake -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <!-- DataTables -->
+  <script
+    src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.2.2/b-3.2.2/b-html5-3.2.2/r-3.0.4/sb-1.8.2/sl-3.0.0/datatables.min.js"></script>
+  <!-- MDB UI Kit -->
+
+  <!-- Add this script to handle the preload layer -->
+  <script>
+    // JavaScript to show preload layer when any navbar link or dropdown link is clicked
+    document.addEventListener('DOMContentLoaded', function () {
+      // Get all links in the navbar and dropdown menus
+      const navbarLinks = document.querySelectorAll('.navbar-nav a, .dropdown-menu a');
+
+      navbarLinks.forEach(link => {
+        // Check if the link is a dropdown toggle (has a data-mdb-dropdown-init attribute)
+        if (!link.hasAttribute('data-mdb-dropdown-init')) {
+          link.addEventListener('click', function (event) {
+            // Prevent the default link behavior
+            event.preventDefault();
+
+            // Show the preload layer
+            document.getElementById('preload-layer').style.display = 'flex';
+
+            // After a short delay, navigate to the new page
+            setTimeout(function () {
+              window.location.href = link.href;
+            }, 100); // Adjust the delay if needed
+          });
+        }
+      });
+
+      // Hide the preload layer when the page is shown (including when navigating back)
+      window.addEventListener('pageshow', function (event) {
+        // Check if the page is being shown from the cache (e.g., back button)
+        if (event.persisted) {
+          // Hide the preload layer
+          document.getElementById('preload-layer').style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
